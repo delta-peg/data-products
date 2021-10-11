@@ -1,0 +1,32 @@
+---
+title: "Map"
+author: "Julian Jordi"
+date: "11 10 2021"
+output: html_document
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse); library(leaflet)
+source("WGS84_CH1903.R")
+```
+
+## Prepare Data
+
+```{r message=FALSE, warning=FALSE}
+bp = read_csv(file = "data/bp.zip")
+bp = bp %>% mutate(
+    lat = CH.to.WGS.lat(STAO_KOORDINATEN_1, STAO_KOORDINATEN_2),
+    long := CH.to.WGS.lng(STAO_KOORDINATEN_1, STAO_KOORDINATEN_2)
+) %>% filter(UIC_LAENDERCODE == 85, ID_VERWALTUNG == 1, IDT_BP_ART <= 0) %>% 
+select(BP_ABKUERZUNG, BEZEICHNUNG, lat, long)
+```
+
+## Plot Some Railway Stations in Switzerland
+
+```{r}
+bp %>% 
+    leaflet() %>% 
+    addTiles() %>% 
+    addMarkers(popup = paste("Station: ", bp$BP_ABKUERZUNG))
+```
+
