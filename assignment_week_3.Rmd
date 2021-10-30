@@ -1,0 +1,60 @@
+---
+title: "Plotly"
+author: "Julian Jordi"
+date: "October 30th, 2021"
+output: html_document
+---
+
+## Plotly Exercise
+
+In this assignment, we are going to re-draw a plot we produced in the course "Reproducible Research" of this Data Science Specialization.
+
+The underlying data are the number of steps taken by time of day of a group of people. We load and preprocess it just as we did then.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+activity = read_csv("data/activity.zip") %>% 
+    group_by(interval) %>% 
+    mutate(steps = ifelse(is.na(steps), mean(steps, na.rm = T), steps)) %>% 
+    ungroup() %>% 
+    mutate(weekday = wday(date, week_start = 1)) %>% 
+    mutate(weekdayOrWeekend = ifelse(weekday <= 5, "weekday", "weekend")) %>% 
+    mutate(weekdayOrWeekend = as.factor(weekdayOrWeekend))
+```
+
+```{r}
+head(activity)
+```
+
+Just like before, we want to compare step activity during weekdays with the activity during weekends.
+
+### Original plot with ggplot
+The original plot looked as follows
+
+```{r ggplot}
+library(ggplot2, warn.conflicts = F)
+ggplot <- activity %>% 
+  group_by(interval, weekdayOrWeekend) %>% 
+  summarise(steps = mean(steps)) %>% 
+  ggplot(aes(x = interval, y = steps)) +
+  geom_line() +
+  facet_grid(rows = vars(weekdayOrWeekend)) +
+  ylab("Number of steps") +
+  xlab("Interval")
+
+ggplot
+```
+
+### And now the Interactive Version with Plotly
+
+
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+```
+
+```{r plotly}
+plotly <- ggplotly(ggplot)
+plotly
+```
+
